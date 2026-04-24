@@ -1,0 +1,91 @@
+{
+  "familles_metiers": {
+    "IT / Data & Transformation": {
+      "mots_cles_famille": [
+        "data",
+        "python",
+        "sql",
+        "etl",
+        "cloud",
+        "api",
+        "machine learning",
+        "pipeline"
+      ],
+      "sous_familles": {
+        "Data engineer": {
+          "exemples_postes": [
+            "Data engineer"
+          ],
+          "mots_cles": [
+            "etl",
+            "pipeline",
+            "sql",
+            "cloud",
+            "spark",
+            "airflow"
+          ]
+        },
+        "Data scientist": {
+          "exemples_postes": [
+            "Data scientist"
+          ],
+          "mots_cles": [
+            "machine learning",
+            "modèles",
+            "python",
+            "statistiques"
+          ]
+        },
+        "Software engineer / Développeur": {
+          "exemples_postes": [
+            "Software engineer",
+            "Développeur fullstack",
+            "Développeur backend",
+            "Développeur mobile"
+          ],
+          "mots_cles": [
+            "développement",
+            "code",
+            "api",
+            "application",
+            "tests"
+          ]
+        }
+      }
+    },
+    "Banque": {
+      "mots_cles_famille": [
+        "banque",
+        "crédit",
+        "solvabilité",
+        "client",
+        "patrimoine",
+        "produits bancaires"
+      ],
+      "sous_familles": {
+        "Conseiller bancaire": {
+          "exemples_postes": [
+            "Conseiller bancaire"
+          ],
+          "mots_cles": [
+            "banque",
+            "client",
+            "conseil",
+            "produits bancaires"
+          ]
+        },
+        "Analyse crédit patrimonial": {
+          "exemples_postes": [
+            "Analyste crédit patrimonial"
+          ],
+          "mots_cles": [
+            "crédit",
+            "analyse",
+            "patrimoine",
+            "solvabilité"
+          ]
+        }
+      }
+    }
+  }
+}

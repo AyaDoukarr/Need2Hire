@@ -1,0 +1,46 @@
+famille_metier_axa,sous_famille_metier,exemples_postes,mots_cles
+Actuariat / Assurance,Souscription,Souscripteur; Chargé de souscription,tarification; évaluation du risque; souscription; contrats
+Actuariat / Assurance,Service clients,Conseiller service clients; Gestionnaire relation client,relation client; gestion de dossiers; satisfaction client
+Actuariat / Assurance,Indemnisation,Gestionnaire sinistres; Chargé d'indemnisation,sinistres; indemnisation; gestion de dossier; analyse
+Actuariat / Assurance,Ingénierie prévention,Ingénieur prévention; Consultant prévention,prévention; risque; audit; sécurité
+Assistance,Chargé d'assistance,Chargé d'assistance,assistance; urgence; accompagnement; relation client
+Banque,Conseiller bancaire,Conseiller bancaire,banque; conseil; client; produits bancaires
+Banque,Analyse crédit patrimonial,Analyste crédit patrimonial,crédit; analyse; patrimoine; solvabilité
+Banque,Octroi / contrôle crédit immobilier,Responsable octroi crédit immobilier; Contrôleur crédit immobilier,crédit immobilier; octroi; contrôle; conformité
+Banque,Conseiller risques comptes,Conseiller risques comptes,risques; comptes; contrôle; conformité
+Gestion d'actifs,Analyste,Analyste financier; Analyste marchés,analyse; marchés; finance; reporting
+Gestion d'actifs,Sales manager,Sales manager,vente; gestion d'actifs; relation client; développement
+Gestion d'actifs,Gérant de portefeuille,Gérant de portefeuille,portefeuille; allocation; marchés; performance
+Marketing / Communication / RSE,Marketing,Chargé de marketing; Chef de projet marketing,marketing; campagne; digital; performance
+Marketing / Communication / RSE,Communication,Chargé de communication; Responsable communication,communication; éditorial; marque; événements
+Marketing / Communication / RSE,RSE,Chargé RSE; Responsable RSE,RSE; impact; durabilité; engagement
+Commercial Salarié,Conseiller commercial épargne et protection,Conseiller commercial épargne et protection,commercial; épargne; protection; conseil
+Commercial Salarié,Chargé de développement agence,Chargé de développement agence,développement commercial; agence; prospection; portefeuille
+Commercial Salarié,Conseiller en gestion de fortune,Conseiller en gestion de fortune,patrimoine; fortune; conseil; client
+Commercial Salarié,Inspecteur / Manager commercial,Inspecteur commercial; Manager commercial,pilotage commercial; management; réseau; performance
+Commercial Salarié,Collaborateur d'agence,Collaborateur d'agence,agence; client; administratif; commercial
+Commercial Salarié,Chargé d'affaires,Chargé d'affaires,développement; portefeuille; relation client; business
+Commercial Salarié,Conseiller bancaire,Conseiller bancaire,banque; commercial; produits bancaires; client
+Commercial Entrepreneur,Agent général d'assurance,Agent général d'assurance,entrepreneuriat; agence; assurance; développement
+Commercial Entrepreneur,Agent général AXA Prévoyance et Patrimoine,Agent général AXA Prévoyance et Patrimoine,prévoyance; patrimoine; entrepreneur; commercial
+Commercial Entrepreneur,Agent général assurance collectives,Agent général assurance collectives,collectives; entreprises; assurance; développement
+Commercial Entrepreneur,Mandataire d'assurance,Mandataire d'assurance,mandataire; assurance; prospection; développement
+IT / Data & Transformation,Data scientist,Data scientist,data science; machine learning; python; modèles
+IT / Data & Transformation,Data engineer,Data engineer,pipeline; data engineering; ETL; SQL; cloud
+IT / Data & Transformation,Architecte informatique,Architecte solutions; Architecte informatique,architecture; SI; cloud; standards
+IT / Data & Transformation,Software engineer / Développeur,Software engineer; Développeur fullstack; Développeur backend; Développeur mobile,développement; code; API; application; tests
+IT / Data & Transformation,Product owner,Product owner,produit; backlog; agile; priorisation
+IT / Data & Transformation,Test engineer,Test engineer; QA engineer,tests; qualité; automatisation; validation
+IT / Data & Transformation,Consultant en sécurité,Consultant sécurité; Analyste cybersécurité,sécurité; cybersécurité; risques; conformité
+IT / Data & Transformation,Conseil en transformation,Consultant transformation; Chef de projet transformation,transformation; change; pilotage; organisation
+Finance,Audit interne,Auditeur interne,audit; contrôle; finance; conformité
+Finance,Comptabilité,Comptable; Responsable comptable,comptabilité; clôture; bilan; finance
+Finance,Contrôle de gestion,Contrôleur de gestion,budget; reporting; analyse; performance
+Finance,Contrôle interne,Contrôleur interne,contrôle interne; risques; conformité; process
+Finance,Gestion du risque,Risk manager; Analyste risques,risques; analyse; finance; contrôle
+Juridique / Audit / Conformité,Juridique,Juriste; Responsable juridique,juridique; contrats; conformité; droit
+Juridique / Audit / Conformité,Conformité,Chargé de conformité; Compliance officer,conformité; réglementation; contrôle; risques
+Juridique / Audit / Conformité,Audit,Auditeur,audit; contrôle; processus; conformité
+Juridique / Audit / Conformité,Contrôle interne,Contrôleur interne,contrôle interne; procédures; risques; conformité
+Ressources Humaines,Ressources humaines,Chargé RH; Talent acquisition; HRBP,RH; recrutement; talent; accompagnement
+Achats / Autres métiers support,Achats,Acheteur; Responsable achats,achats; fournisseurs; négociation; contrats
