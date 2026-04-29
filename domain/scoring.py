@@ -7,6 +7,7 @@ from validation.validation import (
     is_actionable_mission,
     is_actionable_profile_item,
     detect_source_maturity,
+    detect_experience_in_text,
 )
 
 CRITICAL_MISSING_PATTERNS = [
@@ -54,10 +55,26 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
 
     critical_missing, secondary_missing = classify_missing_info(informations_manquantes)
 
+    # Detecter le niveau d'experience dans le texte source AVANT de verifier la fiche
+    source_experience = detect_experience_in_text(source_text) if source_text else {"detected": False}
+    fiche_experience = fiche.get("niveau_experience", "")
+
+    # Filtrer les informations manquantes si detectees dans le texte source
+    if source_experience.get("detected"):
+        # Supprimer "Niveau d'experience" des infos manquantes
+        filtered_critical = []
+        for info in critical_missing:
+            if "niveau" not in info.lower() and "experience" not in info.lower():
+                filtered_critical.append(info)
+        critical_missing = filtered_critical
+    
+    # Si le niveau est dans le texte source mais pas dans la fiche, on le считаPresent
+    niveau_final = fiche_experience if not is_missing_value(fiche_experience) else (source_experience.get("level", ""))
+
     core_fields = {
-        "Intitulé du poste": fiche.get("intitule_poste", ""),
+        tr("checklist_job_title", lang): fiche.get("intitule_poste", ""),
         "Type de contrat": fiche.get("type_contrat", ""),
-        "Niveau d'expérience": fiche.get("niveau_experience", ""),
+        "Niveau d'expérience": niveau_final,
         "Société du groupe": fiche.get("societe_du_groupe", ""),
         "Famille métier": fiche.get("famille_metier", ""),
         "Localisation": fiche.get("localisation", "")
@@ -88,28 +105,31 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
     precision_comments = []
 
     if len(termes_flous) == 0:
-        precision_formula.append("+0 point : aucun terme flou détecté")
+        precision_formula.append("+0 point : besoin clair, aucun terme flou")
     elif len(termes_flous) <= 2:
         precision_score -= 2
-        precision_formula.append("-2 points : quelques termes flous")
+        termes_exemples = ", ".join([str(t.get("terme", ""))[:15] for t in termes_flous[:2]])
+        precision_formula.append(f"-2 points : termes flous : {termes_exemples}...")
     elif len(termes_flous) <= 4:
         precision_score -= 5
-        precision_formula.append("-5 points : plusieurs termes flous")
+        termes_exemples = ", ".join([str(t.get("terme", ""))[:12] for t in termes_flous[:3]])
+        precision_formula.append(f"-5 points : termes generiques : {termes_exemples}...")
     else:
         precision_score -= 8
-        precision_formula.append("-8 points : trop de termes flous")
+        termes_exemples = ", ".join([str(t.get("terme", ""))[:10] for t in termes_flous[:3]])
+        precision_formula.append(f"-8 points : trop flou : {termes_exemples}...")
 
     if len(critical_missing) == 0:
-        precision_formula.append("+0 point : aucune information critique manquante")
+        precision_formula.append("+0 point : toutes les infos critiques presentes")
     elif len(critical_missing) == 1:
         precision_score -= 3
-        precision_formula.append("-3 points : 1 information critique manquante")
+        precision_formula.append(f"-3 points : info manquante : {critical_missing[0][:25]}...")
     elif len(critical_missing) == 2:
         precision_score -= 5
-        precision_formula.append("-5 points : 2 informations critiques manquantes")
+        precision_formula.append(f"-5 points : 2 infos critiques manquantes")
     else:
         precision_score -= 7
-        precision_formula.append("-7 points : plusieurs informations critiques manquantes")
+        precision_formula.append(f"-7 points : {len(critical_missing)} infos manquantes")
 
     if len(secondary_missing) > 0:
         penalty = min(3, len(secondary_missing))
@@ -308,7 +328,7 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
         "source_maturity": source_maturity,
     }
 
-def compute_qualification_confidence(result, computed_score):
+def compute_qualification_confidence(result, computed_score, lang: str = "fr"):
     termes_flous = len(non_empty_list(result.get("termes_flous", [])))
     informations_manquantes = len(non_empty_list(result.get("informations_manquantes", [])))
     fiche = result.get("fiche_de_poste_axa", {})
@@ -334,14 +354,14 @@ def compute_qualification_confidence(result, computed_score):
     score = max(25, min(95, base))
 
     if score < 45:
-        level = "Faible"
-        comment = "L'analyse repose sur un besoin encore trop incomplet ou ambigu."
+        level = tr("level_faible", lang)
+        comment = tr("comment_low_confidence", lang)
     elif score < 70:
-        level = "Moyen"
-        comment = "L'analyse est utile mais certaines zones nécessitent encore une validation RH."
+        level = tr("level_moyen", lang)
+        comment = tr("comment_medium_confidence", lang)
     else:
-        level = "Élevé"
-        comment = "L'analyse est globalement cohérente et suffisamment structurée pour un usage opérationnel."
+        level = tr("level_eleve", lang)
+        comment = tr("comment_high_confidence", lang)
 
     return {"score": score, "level": level, "comment": comment}
 
@@ -352,7 +372,7 @@ def prioritize_risks(risques):
         grouped[mapping.get((r.get("impact", "") or "").lower(), "Important")].append(r)
     return grouped
 
-def build_quality_checklist(result, computed_score):
+def build_quality_checklist(result, computed_score, lang: str = "fr"):
     fiche = result.get("fiche_de_poste_axa", {})
     return [
         {
@@ -387,7 +407,7 @@ def build_quality_checklist(result, computed_score):
         },
     ]
 
-def build_screening_recommendations(result):
+def build_screening_recommendations(result, lang: str = "fr"):
     fiche = result.get("fiche_de_poste_axa", {})
     recs = []
 
@@ -405,3 +425,57 @@ def build_screening_recommendations(result):
         recs.append("Le besoin est suffisamment structuré pour préparer un screening cohérent.")
 
     return recs
+
+
+def build_contextualized_justification(result, source_text: str = "", lang: str = "fr"):
+    """Génère des justifications contextualisées basées sur le contenu réel du besoin."""
+    termes_flous = result.get("termes_flous", [])
+    informations_manquantes = result.get("informations_manquantes", [])
+    fiche = result.get("fiche_de_poste_axa", {})
+    
+    justifications = []
+    
+    # Termes flous - justification métier
+    if termes_flous and len(termes_flous) > 0:
+        premiers_termes = termes_flous[:2]
+        termes_text = []
+        for t in premiers_termes:
+            terme = t.get("terme", "")
+            pourquoi = t.get("pourquoi_c_est_flou", "")
+            if terme:
+                termes_text.append(f"'{terme}' : {pourquoi[:80]}...")
+        if termes_text:
+            justifications.append({
+                "titre": "Termes à préciser",
+                "details": termes_text,
+                "impact_recrutement": "Sans clarification, le screening des CV sera subjectif et poreux."
+            })
+    
+    # Informations manquantes - justification métier
+    if informations_manquantes and len(informations_manquantes) > 0:
+        premiere_info = informations_manquantes[0]
+        justifications.append({
+            "titre": f"Info manquante : {premiere_info[:40]}...",
+            "details": [f"Cette information est indispensable pour {premiere_info.lower()}"],
+            "impact_recrutement": "Impossible de qualifier les candidats sans cette information."
+            if any(x in premiere_info.lower() for x in ["expéri", "compéten", "contrat", "local"]) 
+            else "Risque de malentendu avec le manager."
+        })
+    
+    # Contrat manquant
+    if is_missing_value(fiche.get("type_contrat", "")):
+        justifications.append({
+            "titre": "Type de contrat",
+            "details": ["CDI, CDD, ou Interim non précisés"],
+            "impact_recrutement": " Les candidats postulent sans knowing les conditions. Dépenses inutiles."
+        })
+    
+    # Expérience
+    if is_missing_value(fiche.get("niveau_experience", "")):
+        justifications.append({
+            "titre": "Niveau d'expérience",
+            "details": ["Senior, Confirmé, Junior non précisés"],
+            "impact_recrutement": " On ne peut pas filter les CV efficacement."
+        })
+    
+    return justifications if justifications else None

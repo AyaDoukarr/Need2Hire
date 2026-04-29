@@ -59,6 +59,18 @@ Règles importantes :
 - Cela concerne le résumé, la fiche de poste, les missions, le profil, les risques, les questions, les critères d’évaluation et le diagnostic.
 - Ne mélange jamais plusieurs langues.
 - Garde uniquement les noms propres, technologies, acronymes et intitulés métier standards tels quels : AXA, SQL, Python, Power BI, Data Engineer, CDI.
+
+INSTRUCTIONS POUR LES TERMES FLOUS :
+Pour chaque terme flou identifié, tu dois être TRÈS SPÉCIFIQUE :
+- Cite le TERME EXACT tel qu'il apparaît dans le texte source
+- Explique POURQUOI c'est un problème concret pour un recruteur
+- Donne un exemple de ce qui rendrait le terme clair
+- Ta justification doit être actionable par un RH
+
+Exemple de format attendu :
+"terme": "pilotage de projets"
+"pourwhy_c_est_flou": "L'expression 'pilotage de projets' est trop générique : s'agit-il de projets IT, data, transformation, ou autre ? Un recruteur ne peut pas filtrer les CV sans savoir quel type de projets. Préciser 'pilotage de projets data' rend le besoin actionnable."
+
 Tu dois produire exactement cette structure JSON :
 {{
   "resume_besoin": "string",

@@ -264,26 +264,116 @@ def run_qualification_analysis(lang):
             job_subfamily=pipeline_output.get("subfamily", ""),
         )
 
-        # Si aucun vrai manque bloquant, aucune question de clarification
-        if not raw_result.get("informations_manquantes"):
-            raw_result["questions_de_clarification"] = []
-
-        # Sécurité supplémentaire : si le cœur du besoin est présent,
-        # on supprime les faux manques et fausses questions générées par le LLM
+        # Ajouter automatiquement une question sur l'experience si manquante
+        from validation.validation import detect_experience_in_text
         fiche = raw_result.get("fiche_de_poste_axa", {})
+        fiche_exp = (fiche.get("niveau_experience") or "").strip().lower()
+        source_exp = detect_experience_in_text(consolidated_text)
+        
+        # Verifier si lvl manquant (vide, placeholder, ou non detecte)
+        exp_is_missing = not fiche_exp or fiche_exp in ["", "non precise", "non спе注明", "non renseigne", "nan", "na", "n/a"]
+        exp_not_detected = not source_exp.get("detected", False)
+        
+        # Ajouter info manquante + question si experience non trouvee
+        if exp_is_missing and exp_not_detected:
+            raw_result.setdefault("questions_de_clarification", [])
+            q_list = [q.lower() for q in raw_result.get("questions_de_clarification", [])]
+            if "experience" not in " ".join(q_list):
+                raw_result["questions_de_clarification"].append("Quel niveau d'experience est attendu (junior, confirme, senior, X annees) ?")
+            
+            raw_result.setdefault("informations_manquantes", [])
+            i_list = [i.lower() for i in raw_result.get("informations_manquantes", [])]
+            if "experience" not in " ".join(i_list):
+                raw_result["informations_manquantes"].append("Niveau d'experience attendu non precise")
 
-        has_core_info = all([
-            fiche.get("intitule_poste"),
-            fiche.get("type_contrat"),
-            fiche.get("niveau_experience"),
-            fiche.get("localisation"),
-            fiche.get("votre_role_et_vos_missions"),
-            fiche.get("votre_profil"),
-        ])
+        # CONSERVER les questions - meme si pas de manque bloquant,elles peuvent etre utiles
+        # (lignes supprimees pour eviter suppression automatique)
 
-        if has_core_info:
-            raw_result["informations_manquantes"] = []
-            raw_result["questions_de_clarification"] = []
+        # CONSERVER les questions sur l'experience meme si autres infos completes
+        # (On ne supprime plus tout automatiquement)
+
+        # FILTRAGE COMPLET des questions redondantes
+        # Supprimer question si la REPONSE est deja dans le texte ou la fiche
+        questions = raw_result.get("questions_de_clarification", [])
+        fiche = raw_result.get("fiche_de_poste_axa", {})
+        
+        if questions:
+            text_lower = consolidated_text.lower()
+            # Concatener la fiche
+            fiche_vals = [
+                fiche.get("intitule_poste", ""),
+                fiche.get("type_contrat", ""),
+                fiche.get("localisation", ""),
+                fiche.get("niveau_experience", ""),
+                fiche.get("famille_metier", ""),
+                " ".join(fiche.get("votre_role_et_vos_missions", [])),
+                " ".join(fiche.get("votre_profil", [])),
+            ]
+            fiche_str = " ".join([v for v in fiche_vals if v]).lower()
+            
+            all_text = text_lower + " " + fiche_str
+            filtered_q = []
+            
+            # SUPPRIMER question si topic demande ET reponse presente
+            filters = {
+                # Poste: si un poste est indiquent, supprimer question
+                ("poste", "intitule", "job"): [
+                    "data engineer", "data analyst", "developer", "architecte", 
+                    "chef de projet", "consultant", "ingenieur", "chef projet"
+                ],
+                # Missions: si missions presente
+                ("mission", "missions"): [
+                    "mission", "responsabilite", "piloter", "definir", "analyser"
+                ],
+                # Competences: si competences indiquent
+                ("competence", "skill"): [
+                    "python", "sql", "azure", "aws", "scala", "spark", "tableau"
+                ],
+                # Contrat: si type contrat indicate
+                ("contrat", "cdi"): ["cdi", "cdd", "interim", "freelance", "contrat"],
+                # Localisation: si lieu indique
+                ("paris", "lyon", "remote"): [
+                    "paris", "lyon", "toulouse", "remote", "teletravail", "hybride"
+                ],
+                # Experience: si niveau indicate
+                ("experience", "junior", "senior"): [
+                    "junior", "confirme", "senior", "expert", "ans", "annees"
+                ],
+                # Equipe: si info equipe indique
+                ("equipe", "team"): ["equipe", "team", "manager", "collaborateur"],
+            }
+            
+            for q in questions:
+                q_lower = q.lower()
+                drop = False
+                
+                # Si question mentionne ces mots, supprimer si reponse trouvee
+                if "poste" in q_lower or "intitule" in q_lower:
+                    if any(k in all_text for k in ["data", "engineer", "analyst", "developer", "architecte", "consultant", "ingenieur"]):
+                        drop = True
+                elif "mission" in q_lower:
+                    if len([m for m in fiche.get("votre_role_et_vos_missions", []) if m]) > 0:
+                        drop = True
+                elif "competence" in q_lower or "technologie" in q_lower or "outil" in q_lower:
+                    if any(k in all_text for k in ["python", "sql", "azure", "aws", "scala", "spark", "tableau", "power bi"]):
+                        drop = True
+                elif "contrat" in q_lower:
+                    if any(k in all_text for k in ["cdi", "cdd", "interim", "freelance"]):
+                        drop = True
+                elif "localisation" in q_lower or "ou" in q_lower:
+                    if any(k in all_text for k in ["paris", "lyon", "remote", "teletravail", "france"]):
+                        drop = True
+                elif "experience" in q_lower or "eniorit" in q_lower:
+                    if any(k in all_text for k in ["junior", "confirme", "senior", "expert", "ans", "annees"]):
+                        drop = True
+                elif "equipe" in q_lower:
+                    if "equipe" in all_text or "team" in all_text:
+                        drop = True
+                
+                if not drop:
+                    filtered_q.append(q)
+            
+            raw_result["questions_de_clarification"] = filtered_q[:3]  # Max 3 questions
 
         display_result = build_display_result(raw_result)
         computed_score = pipeline_output["score"]
@@ -359,17 +449,15 @@ def main():
         col0, col1, col2 = st.columns([1.3, 2, 1])
 
         with col0:
-            lang = "fr"
-            st.session_state.agent1_language = "fr"
-            #selected_language = st.selectbox(
-            #    tr("language", lang),
-            #    options=["fr", "en", "es"],
-            #   format_func=lambda x: {"fr": "Français", "en": "English", "es": "Español"}[x],
-            #   index=["fr", "en", "es"].index(st.session_state.agent1_language),
-            #   key="app_language",
-            #)
-            #st.session_state.agent1_language = selected_language
-            #lang = selected_language
+            selected_language = st.selectbox(
+                tr("language", lang),
+                options=["fr", "en", "es"],
+                format_func=lambda x: {"fr": "Français", "en": "English", "es": "Español"}[x],
+                index=["fr", "en", "es"].index(st.session_state.agent1_language),
+                key="app_language",
+            )
+            st.session_state.agent1_language = selected_language
+            lang = selected_language
 
         with col1:
             input_mode = st.radio(
@@ -495,6 +583,11 @@ def main():
             st.session_state.agent1_result.get("risques_detectes", [])
         )
 
+        # Extract market benchmark from pipeline output
+        market_benchmark = None
+        if st.session_state.agent1_pipeline_output:
+            market_benchmark = st.session_state.agent1_pipeline_output.get("market_benchmark")
+
         render_markdown = generate_qualification_report_markdown(
             source_text=source_text,
             job_family=st.session_state.agent1_job_family,
@@ -516,6 +609,7 @@ def main():
             lang=lang,
             prioritized_risks_data=prioritized_risks_data,
             render_markdown=render_markdown,
+            market_benchmark=market_benchmark,
         )
 
         st.markdown('<div class="divider"></div>', unsafe_allow_html=True)

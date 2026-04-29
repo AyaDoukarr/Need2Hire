@@ -1,5 +1,7 @@
 from typing import Any, Dict, List
 
+from i18n import tr
+
 MIN_INPUT_LENGTH = 20
 
 FAMILY_MIN_SCORE_STRONG = 3

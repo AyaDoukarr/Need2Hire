@@ -264,12 +264,18 @@ def render_fiche_poste(fiche, lang):
         )
 
 
-def render_checklist(result, computed_score):
-    checklist = build_quality_checklist(result, computed_score)
+def render_checklist(result, computed_score, lang: str = "fr"):
+    checklist = build_quality_checklist(result, computed_score, lang)
+    
+    # Get translated status values
+    oui = tr("checklist_oui", lang)
+    non = tr("checklist_non", lang)
+    partiel = tr("checklist_partiel", lang)
+    
     for item in checklist:
         statut = item["statut"]
-        css_class = "check-oui" if statut == "Oui" else "check-non" if statut == "Non" else "check-partiel"
-        icon = "✓" if statut == "Oui" else "✗" if statut == "Non" else "~"
+        css_class = "check-oui" if statut == oui else "check-non" if statut == non else "check-partiel"
+        icon = "✓" if statut == oui else "✗" if statut == non else "~"
         st.markdown(
             f"""
             <div class="axa-card" style="padding:14px 18px;margin-bottom:8px">
@@ -341,7 +347,8 @@ def render_analysis_block(
     confidence,
     lang,
     prioritized_risks_data,
-    render_markdown
+    render_markdown,
+    market_benchmark=None,
 ):
     fiche = display_result.get("fiche_de_poste_axa", {})
 
@@ -489,14 +496,128 @@ def render_analysis_block(
             else:
                 st.markdown(f'<div class="empty-state">{tr("no_interview_questions", lang)}</div>', unsafe_allow_html=True)
 
+        # MARKET BENCHMARK
+        st.markdown(f"#### {tr('market_benchmark', lang)}")
+        
+        if market_benchmark:
+            # Helper to map values to CSS classes and labels
+            def get_exigence_style(value):
+                if value == "too demanding":
+                    return "axa-card-warn", tr("too_demanding", lang)
+                elif value == "balanced":
+                    return "axa-card-green", tr("balanced", lang)
+                else:
+                    return "axa-card-accent", tr("not_demanding_enough", lang)
+
+            def get_precision_style(value):
+                if value == "too vague":
+                    return "axa-card-warn", tr("too_vague", lang)
+                elif value == "correct":
+                    return "axa-card-green", tr("correct", lang)
+                else:
+                    return "axa-card-accent", tr("very_precise", lang)
+
+            def get_attractivite_style(value):
+                if value == "low":
+                    return "axa-card-warn", tr("low", lang)
+                elif value == "medium":
+                    return "axa-card-accent", tr("medium", lang)
+                else:
+                    return "axa-card-green", tr("high", lang)
+
+            def get_alignement_style(value):
+                if value == "low":
+                    return "axa-card-warn", tr("low", lang)
+                elif value == "medium":
+                    return "axa-card-accent", tr("medium", lang)
+                else:
+                    return "axa-card-green", tr("high", lang)
+
+            # Display the 4 main metrics
+            col_bm1, col_bm2, col_bm3, col_bm4 = st.columns(4)
+
+            with col_bm1:
+                cls, lbl = get_exigence_style(market_benchmark.get("niveau_exigence", ""))
+                st.markdown(
+                    f'<div class="axa-card {cls}" style="padding:12px 16px;text-align:center">'
+                    f'<div style="font-size:0.72rem;color:var(--axa-muted)">{tr("niveau_exigence", lang)}</div>'
+                    f'<div style="font-weight:700;font-size:0.9rem">{lbl}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+
+            with col_bm2:
+                cls, lbl = get_precision_style(market_benchmark.get("niveau_precision", ""))
+                st.markdown(
+                    f'<div class="axa-card {cls}" style="padding:12px 16px;text-align:center">'
+                    f'<div style="font-size:0.72rem;color:var(--axa-muted)">{tr("niveau_precision", lang)}</div>'
+                    f'<div style="font-weight:700;font-size:0.9rem">{lbl}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+
+            with col_bm3:
+                cls, lbl = get_attractivite_style(market_benchmark.get("attractivite_poste", ""))
+                st.markdown(
+                    f'<div class="axa-card {cls}" style="padding:12px 16px;text-align:center">'
+                    f'<div style="font-size:0.72rem;color:var(--axa-muted)">{tr("attractivite_poste", lang)}</div>'
+                    f'<div style="font-weight:700;font-size:0.9rem">{lbl}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+
+            with col_bm4:
+                cls, lbl = get_alignement_style(market_benchmark.get("alignement_marche", ""))
+                st.markdown(
+                    f'<div class="axa-card {cls}" style="padding:12px 16px;text-align:center">'
+                    f'<div style="font-size:0.72rem;color:var(--axa-muted)">{tr("alignement_marche", lang)}</div>'
+                    f'<div style="font-weight:700;font-size:0.9rem">{lbl}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+
+            # Market risks
+            risks = market_benchmark.get("risques_marche", [])
+            if risks:
+                st.markdown(f"**{tr('risques_marche', lang)}**")
+                for risk in risks:
+                    st.markdown(
+                        f'<div class="axa-card axa-card-warn" style="padding:10px 16px;margin-bottom:6px;font-size:0.88rem">• {risk}</div>',
+                        unsafe_allow_html=True
+                    )
+
+            # Recommendations
+            recos = market_benchmark.get("recommandations", [])
+            if recos:
+                st.markdown(f"**{tr('recommandations', lang)}**")
+                for reco in recos:
+                    st.markdown(
+                        f'<div class="axa-card axa-card-green" style="padding:10px 16px;margin-bottom:6px;font-size:0.88rem">• {reco}</div>',
+                        unsafe_allow_html=True
+                    )
+
+            # Conclusion
+            conclusion = market_benchmark.get("conclusion", "")
+            if conclusion:
+                st.markdown(f"**{tr('conclusion', lang)}**")
+                st.markdown(
+                    f'<div class="info-box">{conclusion}</div>',
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(
+                f'<div class="axa-card" style="padding:14px 18px;color:var(--axa-muted)">{tr("benchmark_unavailable", lang)}</div>',
+                unsafe_allow_html=True
+            )
+
     with tab3:
         st.markdown(f"#### {tr('quality_checklist', lang)}")
-        render_checklist(raw_result, computed_score)
+        render_checklist(raw_result, computed_score, lang)
 
         st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
         st.markdown(f"#### {tr('screening_reco', lang)}")
-        for reco in build_screening_recommendations(raw_result):
+        for reco in build_screening_recommendations(raw_result, lang):
             st.markdown(
                 f'<div class="axa-card axa-card-green" style="padding:12px 16px;margin-bottom:8px;font-size:0.88rem">• {reco}</div>',
                 unsafe_allow_html=True

@@ -13,7 +13,8 @@ TEXT_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 AUDIO_MODEL = os.getenv("GROQ_AUDIO_MODEL", "whisper-large-v3-turbo")
 API_KEY = os.getenv("GROQ_API_KEY")
 
-STRICT_INVALID_MESSAGE = "⚠️ Veuillez préciser un besoin métier réel."
+_STRICT_INVALID_MESSAGE_BASE = "Veuillez préciser un besoin métier réel."
+STRICT_INVALID_MESSAGE = "⚠️ " + _STRICT_INVALID_MESSAGE_BASE
 
 TAXONOMY_CSV_PATH = str(BASE_DIR / "data" / "axa_taxonomie_metiers.csv")
 REFERENCE_CSV_PATH = str(BASE_DIR / "data" / "axa_referentiel_metiers.csv")

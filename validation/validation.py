@@ -1,11 +1,36 @@
 from typing import Any, Dict, List
+import re
 
 
-STRICT_INVALID_MESSAGE = "⚠️ Veuillez préciser un besoin métier réel."
+STRICT_INVALID_MESSAGE = "??Veuillez precis(??un besoin metier reel."
 
 
 def normalize_text(value: str) -> str:
     return (value or "").strip().lower()
+
+
+# Patterns pour detecter le niveau d'experience dans le texte source
+EXPERIENCE_KEYWORDS = ["junior", "confirme", "senior", "expert", "tempon", "experimente"]
+
+
+def detect_experience_in_text(text: str) -> dict:
+    """Detecte le niveau d'experience dans un texte."""
+    if not text:
+        return {"detected": False, "level": None, "source": None}
+    
+    text_lower = text.lower()
+    
+    # Niveau explicite
+    for level in EXPERIENCE_KEYWORDS:
+        if level in text_lower:
+            return {"detected": True, "level": level, "source": level}
+    
+    # Annees d'experience - simple sans caracteres speciaux
+    years_match = re.search(r"(\d+)ans", text_lower)
+    if years_match and "experience" in text_lower:
+        return {"detected": True, "level": f"{years_match.group(1)}ans", "source": years_match.group(0)}
+    
+    return {"detected": False, "level": None, "source": None}
 
 
 def non_empty_list(value) -> List[Any]:
@@ -104,52 +129,42 @@ def detect_source_maturity(source_text: str) -> str:
 
 
 def validate_recruitment_input(text: str) -> Dict[str, Any]:
-    normalized = normalize_text(text)
-
-    if len(normalized) < 20:
-        return {
-            "valid": False,
-            "reason": STRICT_INVALID_MESSAGE,
-        }
-
-    invalid_patterns = [
-        "quel temps",
-        "météo",
-        "meteo",
-        "poème",
-        "poeme",
-        "je veux être heureux",
-        "je veux etre heureux",
-        "raconte moi une histoire",
-        "blague",
-        "recette",
-    ]
-
-    if any(pattern in normalized for pattern in invalid_patterns):
-        return {
-            "valid": False,
-            "reason": STRICT_INVALID_MESSAGE,
-        }
-
-    recruitment_markers = [
-        "poste", "recrut", "candidat", "profil", "mission", "compétence",
-        "competence", "expérience", "experience", "cdi", "cdd", "manager",
-        "équipe", "equipe", "sql", "python", "cloud", "data", "banque",
-        "finance", "conformité", "conformite", "projet",
-    ]
-
-    has_marker = any(marker in normalized for marker in recruitment_markers)
-
-    if not has_marker and len(normalized.split()) < 6:
-        return {
-            "valid": False,
-            "reason": STRICT_INVALID_MESSAGE,
-        }
-
-    return {
-        "valid": True,
-        "reason": "Besoin exploitable",
-    }
+    # Validation tres simple et permissive
+    if not text or len(text.strip()) < 15:
+        return {"valid": False, "reason": "Texte trop court"}
+    
+    t = text.lower()
+    
+    # Rejets absolus (seulement pour du garbage total)
+    if any(x in t for x in ["blague", "recette", "poeme", "meteo"]):
+        return {"valid": False, "reason": STRICT_INVALID_MESSAGE}
+    
+    # Compter les mots reltes au recrutement
+    keywords_found = []
+    recruitment_terms = ["poste", "recrut", "profil", "mission", "competence", 
+                     "experience", "cdi", "cdd", "equipe", "data", "banque", 
+                     "finance", "projet", "consultant", "offre", "emploi",
+                     "recherch", "metier", "candidat", "equipes"]
+    
+    for term in recruitment_terms:
+        if term in t:
+            keywords_found.append(term)
+    
+    # LOGIQUE:
+    # - Texte > 100 carac => Accepter (meme sans mots cles)
+    # - Sinon avoir au moins 1 mot cle
+    # - Texte > 30 carac et pas rejete => Accepter
+    
+    if len(text) > 100:
+        return {"valid": True, "reason": "Texte sufficient"}
+    
+    if len(keywords_found) >= 1:
+        return {"valid": True, "reason": "Termes trouves"}
+    
+    if len(text) < 30:
+        return {"valid": False, "reason": STRICT_INVALID_MESSAGE}
+    
+    return {"valid": True, "reason": "Accepte"}
 
 
 def build_display_result(result: Dict[str, Any]) -> Dict[str, Any]:

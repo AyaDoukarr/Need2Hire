@@ -1,15 +1,18 @@
 from config import STRICT_INVALID_MESSAGE
 from domain.matching import score_families, score_subfamilies
+from domain.scoring import compute_qualification_score, compute_qualification_confidence
 from domain.rules import (
     should_stop_for_invalid_input,
     lock_family,
     lock_subfamily,
+    tr as tr_rules,
 )
 from data.data_layer import get_subfamily_names
+from i18n import tr
 from agents.family_router_agent import run_family_router
 from agents.subfamily_router_agent import run_subfamily_router
 from agents.extractor_agent import run_extraction
-from domain.scoring import compute_qualification_score, compute_qualification_confidence
+from agents.market_benchmark_agent import run_market_benchmark
 
 
 def run_pipeline(user_input: str, lang: str = "fr"):
@@ -42,7 +45,7 @@ def run_pipeline(user_input: str, lang: str = "fr"):
         if famille_detectee == "indeterminee" or confiance < 0.5:
             return {
                 "status": "stop",
-                "error": "⚠️ Le besoin est trop ambigu pour identifier une famille métier de façon fiable.",
+                "error": tr("ambiguous_need_error", lang),
                 "family_scores": family_scores,
                 "family_router_output": family_router_output,
             }
@@ -90,7 +93,23 @@ def run_pipeline(user_input: str, lang: str = "fr"):
         lang=lang,
     )
 
-    # 6. KPI déterministes
+    # 6. Benchmark marché (optionnel - ne doit pas bloquer le pipeline)
+    market_benchmark = None
+    fiche_poste = extraction_result.get("fiche_de_poste_axa", {}) if extraction_result else {}
+    
+    if fiche_poste and fiche_poste.get("intitule_poste"):
+        try:
+            market_benchmark = run_market_benchmark(
+                job_family=locked_family,
+                job_subfamily=locked_subfamily,
+                fiche_poste=fiche_poste,
+                lang=lang,
+            )
+        except Exception:
+            # En cas d'échec, on continue sans benchmark
+            market_benchmark = None
+
+    # 7. KPI déterministes
     computed_score = compute_qualification_score(
         result=extraction_result,
         source_text=user_input,
@@ -100,6 +119,7 @@ def run_pipeline(user_input: str, lang: str = "fr"):
     confidence = compute_qualification_confidence(
         result=extraction_result,
         computed_score=computed_score,
+        lang=lang,
     )
 
     return {
@@ -116,4 +136,5 @@ def run_pipeline(user_input: str, lang: str = "fr"):
         "result": extraction_result,
         "score": computed_score,
         "confidence": confidence,
+        "market_benchmark": market_benchmark,
     }

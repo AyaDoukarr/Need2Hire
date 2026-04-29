@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Need2Hire - IA de Qualification du Besoin de Recrutement</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+<style>
+:root{--sqorus-blue:#001c58;--sqorus-dark:#002855;--sqorus-light:#e8f0f8}
+.reveal{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:20px}
+.reveal h1{font-size:2.4em;color:var(--sqorus-blue);font-weight:300;letter-spacing:-1px}
+.reveal h2{font-size:1.6em;color:var(--sqorus-blue);font-weight:400;border:none;padding:0;margin-bottom:30px}
+.reveal h3{font-size:1.1em;color:var(--sqorus-dark);font-weight:500}
+.reveal ul{padding-left:20px;margin:10px 0}
+.reveal li{margin:6px 0;font-size:0.85em}
+.reveal .small{font-size:0.7em;color:#666}
+.reveal .highlight{color:var(--sqorus-blue);font-weight:600}
+.accent-box{background:var(--sqorus-light);padding:25px 30px;border-radius:0;border-left:4px solid var(--sqorus-blue);margin:20px 0}
+.accent-box h4{color:var(--sqorus-blue);font-size:0.95em;margin:0 0 10px 0}
+.step-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin:25px 0}
+.step-grid .step{background:#fff;border:1px solid #ddd;padding:15px;text-align:center;border-radius:4px}
+.step-grid .step-num{font-size:1.8em;color:var(--sqorus-blue);font-weight:700;display:block;margin-bottom:5px}
+.step-grid .step-label{font-size:0.7em;color:#555}
+.flow-row{display:flex;align-items:center;justify-content:center;gap:20px;margin:30px 0}
+.flow-row .box{background:var(--sqorus-blue);color:#fff;padding:15px 25px;border-radius:4px;font-size:0.8em}
+.flow-row .arrow{font-size:1.5em;color:var(--sqorus-blue)}
+.layer-diagram{margin:20px 0}
+.layer{background:#fff;border:2px solid #ddd;padding:15px 20px;margin:8px 0;border-radius:4px}
+.layer-title{font-weight:600;color:var(--sqorus-blue);font-size:0.95em}
+.layer-content{font-size:0.8em;color:#555;margin-top:5px}
+.layer-highlight{border-color:var(--sqorus-blue);border-width:3px}
+.cols{display:flex;gap:40px}
+.cols>div{flex:1}
+.cols h4{color:var(--sqorus-blue);font-size:0.9em;margin:0 0 10px 0}
+.cols ul{font-size:0.8em}
+.kpi-row{display:flex;justify-content:center;gap:60px;margin:30px 0}
+.kpi{text-align:center}
+.kpi-value{font-size:2.5em;color:var(--sqorus-blue);font-weight:700}
+.kpi-label{font-size:0.75em;color:#666}
+.list-tight li{margin:4px 0}
+.justify{text-align:justify}
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- SLIDE 1: TITRE -->
+<section>
+<h1>Need2Hire</h1>
+<h3 style="color:#666;font-weight:300">IA de Qualification du Besoin de Recrutement</h3>
+<div style="margin-top:50px">
+<p style="font-size:1.1em"><strong>SQORUS</strong> · IA RH</p>
+<p style="font-size:0.8em;color:#999">Projet AXA · 2026</p>
+</div>
+</section>
+
+<!-- SLIDE 2: LE PROBLÈME -->
+<section>
+<h2>LE PROBLÈME</h2>
+<div class="accent-box">
+<h4>Le besoin manager = imprécis, subjectif, non structuré</h4>
+<p style="font-style:italic;color:#444">"Je cherche un bon profil data senior autonome"</p>
+</div>
+<div class="cols">
+<div>
+<h4>CONSÉQUENCES</h4>
+<ul>
+<li>2-3 semaines d'échanges RH / manager</li>
+<li>Aucun critère objectif → screening impossible</li>
+<li>Incohérence avec taxonomie groupe</li>
+<li>Critères flous : "junior", "senior", "autonome"</li>
+</ul>
+</div>
+<div>
+<h4>IMPACT RH</h4>
+<ul>
+<li>Temps de qualification excessif</li>
+<li>Mauvais candidats sélectionnés</li>
+<li>Perte de temps manager</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 3: OBJECTIF -->
+<section>
+<h2>OBJECTIF</h2>
+<div class="accent-box" style="background:var(--sqorus-blue);color:#fff">
+<h4 style="color:#fff">Transformer une demande vague en fiche de poste AXA structurée</h4>
+</div>
+<div class="kpi-row">
+<div class="kpi"><span class="kpi-value">-50%</span><br><span class="kpi-label">temps qualification</span></div>
+<div class="kpi"><span class="kpi-value">100%</span><br><span class="kpi-label">standard AXA</span></div>
+<div class="kpi"><span class="kpi-value">Obj.</span><br><span class="kpi-label">critères screening</span></div>
+</div>
+</section>
+
+<!-- SLIDE 4: SOLUTION -->
+<section>
+<h2>LA SOLUTION</h2>
+<div class="cols">
+<div>
+<h4>INPUT</h4>
+<ul class="list-tight">
+<li>Texte libre</li>
+<li>Audio (voix)</li>
+<li>Fichier existant</li>
+</ul>
+</div>
+<div>
+<h4>TRAITEMENT</h4>
+<ul class="list-tight">
+<li>IA multi-agents</li>
+<li>Logique RAG</li>
+<li>Taxonomie AXA</li>
+<li>Score qualité</li>
+</ul>
+</div>
+<div>
+<h4>OUTPUT</h4>
+<ul class="list-tight">
+<li>Fiche AXA</li>
+<li>Critères screening</li>
+<li>Questions entretien</li>
+<li>Rapport RH</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 5: PARCOURS UTILISATEUR -->
+<section>
+<h2>PARCOURS</h2>
+<div class="step-grid">
+<div class="step"><span class="step-num">1</span><span class="step-label">Saisie</span></div>
+<div class="step"><span class="step-num">2</span><span class="step-label">Validation</span></div>
+<div class="step"><span class="step-num">3</span><span class="step-label">Analyse</span></div>
+<div class="step"><span class="step-num">4</span><span class="step-label">Génération</span></div>
+<div class="step"><span class="step-num">5</span><span class="step-label">Score</span></div>
+</div>
+<ul class="small" style="margin-top:20px">
+<li>1. Texte / Audio / Fichier</li>
+<li>2. Vérification longueur</li>
+<li>3. Famille + Sous-famille (45 familles)</li>
+<li>4. Fiche JSON structurée</li>
+<li>5. Score 5 dimensions (0-100)</li>
+</ul>
+</section>
+
+<!-- SLIDE 6: FLUX DONNÉES -->
+<section>
+<h2>FLUX DE DONNÉES</h2>
+<div class="flow-row">
+<div class="box">Entrée<br><span class="small">texte/audio</span></div>
+<div class="arrow">→</div>
+<div class="box">Validation<br><span class="small">Python</span></div>
+<div class="arrow">→</div>
+<div class="box">Matching<br><span class="small">taxonomie</span></div>
+<div class="arrow">→</div>
+<div class="box">LLM Agent<br><span class="small">extraction</span></div>
+<div class="arrow">→</div>
+<div class="box">Scoring<br><span class="small">5 dims</span></div>
+</div>
+<div class="accent-box" style="margin-top:20px">
+<h4>RAG : Taxonomie AXA → Contexte métier injecté dans le prompt LLM</h4>
+</div>
+</section>
+
+<!-- SLIDE 7: ARCHITECTURE -->
+<section>
+<h2>ARCHITECTURE TECHNIQUE</h2>
+<div class="layer-diagram">
+<div class="layer layer-highlight"><span class="layer-title">UI (app.py)</span><br><span class="layer-content">Streamlit · Gestion session · Affichage</span></div>
+<div class="layer"><span class="layer-title">Orchestration (pipeline.py)</span><br><span class="layer-content">Coordinator · Erreurs · Langue</span></div>
+<div class="layer"><span class="layer-title">Agents IA</span><br><span class="layer-content">Family Router · Extractor · Quality · Benchmark</span></div>
+<div class="layer"><span class="layer-title">Domain</span><br><span class="layer-content">Scoring · Matching · Rules</span></div>
+<div class="layer"><span class="layer-title">Services</span><br><span class="layer-content">LLM (Groq) · Audio</span></div>
+<div class="layer layer-highlight"><span class="layer-title">Data Layer</span><br><span class="layer-content">Taxonomie · Référentiels · JSON</span></div>
+</div>
+</section>
+
+<!-- SLIDE 8: RAG -->
+<section>
+<h2>RÉFÉRENTIELS MÉTIER</h2>
+<div class="cols">
+<div>
+<h4>DATA LAYER</h4>
+<ul class="list-tight small">
+<li>axa_taxonomie_metiers.csv</li>
+<li>axa_referentiel_metiers.csv</li>
+<li>axa_fiches_poste_it_enrichi.csv</li>
+<li>familles_metiers_axa.json</li>
+</ul>
+</div>
+<div>
+<h4>CONTENU</h4>
+<ul class="list-tight small">
+<li>45 familles métier AXA</li>
+<li>Mots-clés / famille</li>
+<li>Sous-familles</li>
+<li>Compétences techniques</li>
+<li>Exemples de postes</li>
+</ul>
+</div>
+</div>
+<div class="accent-box" style="margin-top:25px">
+<h4>Le contexte métier = injecté dans le prompt LLM</h4>
+<p class="small">Alignement automatique avec le standard AXA</p>
+</div>
+</section>
+
+<!-- SLIDE 9: AGENTS -->
+<section>
+<h2>AGENTS IA</h2>
+<div class="cols">
+<div>
+<h4>ROUTING</h4>
+<ul>
+<li>Family Router</li>
+<li>Subfamily Router</li>
+</ul>
+</div>
+<div>
+<h4>EXTRACTION</h4>
+<ul>
+<li>Extractor Agent</li>
+<li>Quality Agent</li>
+</ul>
+</div>
+<div>
+<h4>ANALYSE</h4>
+<ul>
+<li>Market Benchmark</li>
+<li>Summary Agent</li>
+</ul>
+</div>
+</div>
+<div class="accent-box" style="margin-top:25px">
+<h4>STRATÉGIE HYBRIDE</h4>
+<p class="small">Matching Python (rapide) → LLM si incertain</p>
+</div>
+</section>
+
+<!-- SLIDE 10: SCORING -->
+<section>
+<h2>SCORING</h2>
+<div class="cols">
+<div>
+<h4>5 DIMENSIONS</h4>
+<ul class="list-tight">
+<li>1. Complétude (20)</li>
+<li>2. Précision (20)</li>
+<li>3. Screening (20)</li>
+<li>4. Missions (20)</li>
+<li>5. Conformité AXA (20)</li>
+</ul>
+</div>
+<div>
+<h4>INTERPRÉTATION</h4>
+<ul class="list-tight">
+<li>0-39 : À clarifier</li>
+<li>40-69 : À ajuster</li>
+<li>70-84 : Opérationnel</li>
+<li>85-100 : Excellence</li>
+</ul>
+<p style="margin-top:15px">Confiance : 25-95%</p>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 11: VALEUR -->
+<section>
+<h2>VALEUR MÉTIER</h2>
+<div class="kpi-row">
+<div class="kpi"><span class="kpi-value">-50%</span><br><span class="kpi-label">temps qualification</span></div>
+<div class="kpi"><span class="kpi-value">100%</span><br><span class="kpi-label">standard AXA</span></div>
+<div class="kpi"><span class="kpi-value">Obj.</span><br><span class="kpi-label">critères décisions</span></div>
+</div>
+<div class="cols">
+<div>
+<h4>POINTS FORTS</h4>
+<ul>
+<li>Architecture modulaire</li>
+<li>Hybridation Python/LLM</li>
+<li>Score objectif</li>
+</ul>
+</div>
+<div>
+<h4>LIMITES</h4>
+<ul>
+<li>Dépendance LLM</li>
+<li>Pas d'intégration ATS</li>
+<li>Rate limits API</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 12: PERSPECTIVES -->
+<section>
+<h2>PERSPECTIVES</h2>
+<div class="cols">
+<div>
+<h4>COURT TERME</h4>
+<ul>
+<li>Intégration Workday</li>
+<li>Multi-langues</li>
+</ul>
+</div>
+<div>
+<h4>MOYEN TERME</h4>
+<ul>
+<li>Benchmark salarial</li>
+<li>Matching candidats</li>
+</ul>
+</div>
+<div>
+<h4>LONG TERME</h4>
+<ul>
+<li>Prédiction succès</li>
+<li>Automatisation totale</li>
+</ul>
+</div>
+</div>
+</section>
+
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script>Reveal.initialize({hash:true,slideNumber:true,transition:'fade',transitionSpeed:'default',center:true});</script>
+</body>
+</html>
