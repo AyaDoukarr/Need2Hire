@@ -448,10 +448,7 @@ def main():
         st.markdown(f"**{tr('settings', lang)}**")
         col0, col1, col2 = st.columns([1.3, 2, 1])
 
-        with col0:
-            st.markdown("**Langue:** Français")
-            # Langue fixe en FR
-            lang = "fr"
+        
 
         with col1:
             input_mode = st.radio(
