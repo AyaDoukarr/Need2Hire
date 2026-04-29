@@ -1,7 +1,6 @@
 import uuid
 import streamlit as st
 import streamlit.components.v1 as components
-import plotly.graph_objects as go
 
 from i18n import tr
 from domain.scoring import build_quality_checklist, build_screening_recommendations
@@ -11,68 +10,6 @@ from data.data_layer import filter_taxonomy_rows, extract_reference_examples
 
 def render_section_title(title: str):
     st.markdown(f'<div class="section-title">{title}</div>', unsafe_allow_html=True)
-
-
-def render_radar_chart(computed_score, lang: str = "fr"):
-    """Affiche un graphique radar des scores."""
-    if not computed_score or "details" not in computed_score:
-        return
-    
-    # Extraire les scores
-    categories = []
-    scores = []
-    max_scores = []
-    
-    for d in computed_score.get("details", []):
-        categories.append(d.get("dimension", ""))
-        scores.append(d.get("score", 0))
-        max_scores.append(d.get("sur", 20))
-    
-    if len(categories) < 3:
-        return
-    
-    # Creer le radar avec plotly
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatterpolar(
-        r=scores + [scores[0]],  # Fermer le polygone
-        theta=categories + [categories[0]],
-        fill='toself',
-        fillcolor='rgba(0, 101, 176, 0.3)',
-        line=dict(color='#0061B0', width=3),
-        marker=dict(size=8, color='#0061B0'),
-        name='Score'
-    ))
-    
-    # Ajouter la forme de reference (maximum)
-    fig.add_trace(go.Scatterpolar(
-        r=max_scores + [max_scores[0]],
-        theta=categories + [categories[0]],
-        mode='lines',
-        line=dict(color='rgba(128,128,128,0.3)', width=1, dash='dash'),
-        name='Maximum',
-        hoverinfo='skip'
-    ))
-    
-    fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, max(max_scores)],
-                showticklabels=True,
-                ticksuffix='',
-                gridcolor='rgba(128,128,128,0.2)',
-            ),
-            bgcolor='rgba(0,0,0,0)',
-        ),
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#333'),
-        showlegend=False,
-        margin=dict(l=40, r=40, t=20, b=40),
-        height=350,
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
 
 
 def render_flip_card(title, score, max_score, details, badge_text="", is_decision=False):
@@ -464,10 +401,6 @@ def render_analysis_block(
 
     render_section_title(tr("detailed_score", lang))
     st.caption(tr("click_kpi_caption", lang))
-    
-    # Afficher le radar chart
-    render_radar_chart(computed_score, lang)
-    
     for d in computed_score["details"]:
         render_clickable_score_bar(d, lang)
 
