@@ -449,15 +449,9 @@ def main():
         col0, col1, col2 = st.columns([1.3, 2, 1])
 
         with col0:
-            selected_language = st.selectbox(
-                tr("language", lang),
-                options=["fr", "en", "es"],
-                format_func=lambda x: {"fr": "Français", "en": "English", "es": "Español"}[x],
-                index=["fr", "en", "es"].index(st.session_state.agent1_language),
-                key="app_language",
-            )
-            st.session_state.agent1_language = selected_language
-            lang = selected_language
+            st.markdown("**Langue:** Français")
+            # Langue fixe en FR
+            lang = "fr"
 
         with col1:
             input_mode = st.radio(
