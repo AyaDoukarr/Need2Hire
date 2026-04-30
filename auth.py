@@ -2,8 +2,7 @@ import re
 import streamlit as st
 
 
-AXA_EMAIL_PATTERN = r"^[a-zA-ZÀ-ÿ'-]+\.[a-zA-ZÀ-ÿ'-]+(\.external)?@axa\.com$"
-
+AXA_EMAIL_PATTERN = r"^[a-zA-ZÀ-ÿ0-9'-]+(\.[a-zA-ZÀ-ÿ0-9'-]+)+(\.external)?@axa\.com$"
 
 def is_valid_axa_email(email: str) -> bool:
     email = (email or "").strip().lower()
