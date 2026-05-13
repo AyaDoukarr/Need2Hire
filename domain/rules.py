@@ -15,9 +15,7 @@ FAMILY_CONFIDENCE_WEAK = 0.50
 
 
 def should_stop_for_invalid_input(user_input: str) -> bool:
-    return len((user_input or "").strip()) < MIN_INPUT_LENGTH
-
-
+    return False
 def estimate_family_confidence(family_scores: List[Dict[str, Any]]) -> float:
     if not family_scores:
         return 0.0

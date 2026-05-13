@@ -43,21 +43,12 @@ def run_pipeline(user_input: str, lang: str = "fr"):
         confiance = float(family_router_output.get("confiance", 0))
 
         if famille_detectee == "indeterminee" or confiance < 0.5:
-            return {
-                "status": "stop",
-                "error": tr("ambiguous_need_error", lang),
-                "family_scores": family_scores,
-                "family_router_output": family_router_output,
-            }
-
-        locked_family = famille_detectee
+            locked_family = "Générique"
+        else:
+            locked_family = famille_detectee
 
     else:
-        return {
-            "status": "stop",
-            "error": STRICT_INVALID_MESSAGE,
-            "family_scores": family_scores,
-        }
+         locked_family = "Générique"
 
     # 4. Pré-matching Python sur les sous-familles de la famille verrouillée
     subfamily_scores = score_subfamilies(user_input, locked_family)

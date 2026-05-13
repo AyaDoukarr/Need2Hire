@@ -89,13 +89,13 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
     if missing_core:
         penalty = min(10, len(missing_core) * 2)
         completeness_score -= penalty
-        completeness_formula.append(f"-{penalty} points : champs structurants manquants ({', '.join(missing_core)})")
+        completeness_formula.append(tr("formula_missing_structuring", lang))
     else:
-        completeness_formula.append("+0 point : tous les champs structurants sont présents")
+        completeness_formula.append(tr("formula_structuring_present", lang))
 
     if len(present_core) >= 5 and len(missions) >= 3 and len(profil) >= 3:
         completeness_score += 2
-        completeness_formula.append("+2 points : structure suffisamment fournie")
+        completeness_formula.append(tr("formula_structure_detailed", lang))
 
     completeness_comments.append("Mesure si la base du besoin est assez complète pour lancer un recrutement.")
     completeness_score = max(0, min(20, completeness_score))
@@ -105,44 +105,61 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
     precision_comments = []
 
     if len(termes_flous) == 0:
-        precision_formula.append("+0 point : besoin clair, aucun terme flou")
+        precision_formula.append(tr("formula_clear_need", lang))
+
     elif len(termes_flous) <= 2:
         precision_score -= 2
-        termes_exemples = ", ".join([str(t.get("terme", ""))[:15] for t in termes_flous[:2]])
-        precision_formula.append(f"-2 points : termes flous : {termes_exemples}...")
+        termes_exemples = ", ".join([str(t.get("terme", "")) for t in termes_flous[:2]])
+        precision_formula.append(
+            tr("formula_terms_to_clarify", lang).format(terms=termes_exemples)
+        )
+
     elif len(termes_flous) <= 4:
         precision_score -= 5
-        termes_exemples = ", ".join([str(t.get("terme", ""))[:12] for t in termes_flous[:3]])
-        precision_formula.append(f"-5 points : termes generiques : {termes_exemples}...")
+        termes_exemples = ", ".join([str(t.get("terme", "")) for t in termes_flous[:3]])
+        precision_formula.append(
+            tr("formula_terms_to_clarify", lang).format(terms=termes_exemples)
+        )
+
     else:
         precision_score -= 8
-        termes_exemples = ", ".join([str(t.get("terme", ""))[:10] for t in termes_flous[:3]])
-        precision_formula.append(f"-8 points : trop flou : {termes_exemples}...")
-
-    if len(critical_missing) == 0:
-        precision_formula.append("+0 point : toutes les infos critiques presentes")
-    elif len(critical_missing) == 1:
-        precision_score -= 3
-        precision_formula.append(f"-3 points : info manquante : {critical_missing[0][:25]}...")
-    elif len(critical_missing) == 2:
-        precision_score -= 5
-        precision_formula.append(f"-5 points : 2 infos critiques manquantes")
-    else:
-        precision_score -= 7
-        precision_formula.append(f"-7 points : {len(critical_missing)} infos manquantes")
+        termes_exemples = ", ".join([str(t.get("terme", "")) for t in termes_flous[:4]])
+        precision_formula.append(
+            tr("formula_many_terms", lang).format(terms=termes_exemples)
+        )
+        if len(critical_missing) == 0:
+            precision_formula.append(tr("formula_all_critical_present", lang))
+        elif len(critical_missing) == 1:
+            precision_score -= 3
+            precision_formula.append(tr("formula_one_critical_missing", lang))
+        elif len(critical_missing) == 2:
+            precision_score -= 5
+            precision_formula.append(tr("formula_two_critical_missing", lang))
+        else:
+            precision_score -= 7
+            precision_formula.append(
+                tr("formula_critical_missing", lang).format(
+                    items=", ".join(critical_missing[:3])
+                )
+            )
 
     if len(secondary_missing) > 0:
         penalty = min(3, len(secondary_missing))
         precision_score -= penalty
-        precision_formula.append(f"-{penalty} points : informations secondaires encore à préciser")
+        precision_formula.append(
+            tr("formula_secondary_missing", lang).format(
+                items=", ".join(secondary_missing[:3])
+            )
+        )
+
 
     if source_maturity == "fiche_detaillee":
         precision_score += 2
-        precision_formula.append("+2 points : source déjà très structurée")
+        precision_formula.append(tr("formula_source_structured", lang))
 
-    precision_comments.append("Mesure la clarté réelle du besoin et le risque d’ambiguïté.")
+
+    precision_comments.append(tr("comment_precision", lang))
     precision_score = max(0, min(20, precision_score))
-
     screening_score = 0
     screening_formula = []
     screening_comments = []
@@ -151,33 +168,32 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
 
     if len(profil) >= 4 and actionable_profile_count >= 3:
         screening_score += 6
-        screening_formula.append("+6 points : profil détaillé et exploitable")
+        screening_formula.append(tr("formula_profile_detailed", lang))
     elif len(profil) >= 2 and actionable_profile_count >= 2:
         screening_score += 4
-        screening_formula.append("+4 points : profil partiellement exploitable")
+        screening_formula.append(tr("formula_profile_partial", lang))
     elif actionable_profile_count >= 1:
         screening_score += 2
-        screening_formula.append("+2 points : quelques éléments screening utiles")
+        screening_formula.append(tr("formula_screening_elements", lang))
 
     if len(criteres) >= 3:
         screening_score += 6
-        screening_formula.append("+6 points : critères de screening présents")
+        screening_formula.append(tr("formula_screening_criteria", lang))
     elif len(criteres) >= 1:
         screening_score += 3
-        screening_formula.append("+3 points : critères partiels")
+        screening_formula.append(tr("formula_partial_criteria", lang))
 
     if len(questions_entretien) >= 3:
         screening_score += 4
-        screening_formula.append("+4 points : questions d’entretien utiles")
+        screening_formula.append(tr("formula_interview_questions", lang))
     elif len(questions_entretien) >= 1:
         screening_score += 2
-        screening_formula.append("+2 points : questions d’entretien partielles")
+        screening_formula.append(tr("formula_partial_questions", lang))
 
     if len(critical_missing) >= 2:
         screening_score -= 2
-        screening_formula.append("-2 points : trop d’angles morts pour sécuriser le screening")
-
-    screening_comments.append("Mesure si le besoin aide concrètement à filtrer les CV.")
+        screening_formula.append(tr("formula_screening_uncertainty", lang))
+    screening_comments.append(tr("comment_screening", lang))
     screening_score = max(0, min(20, screening_score))
 
     mission_score = 0
@@ -190,29 +206,29 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
 
     if actionable_missions_count >= 4:
         mission_score += 10
-        mission_formula.append("+10 points : missions nombreuses et actionnables")
+        mission_formula.append(tr("formula_many_actionable_missions", lang))
     elif actionable_missions_count >= 2:
         mission_score += 7
-        mission_formula.append("+7 points : missions globalement claires")
+        mission_formula.append(tr("formula_clear_missions", lang))
     elif actionable_missions_count >= 1:
         mission_score += 4
-        mission_formula.append("+4 points : quelques missions utiles")
+        mission_formula.append(tr("formula_some_useful_missions", lang))
 
     if len(missions) >= 5:
         mission_score += 4
-        mission_formula.append("+4 points : volume de missions satisfaisant")
+        mission_formula.append(tr("formula_mission_volume_good", lang))
     elif len(missions) >= 3:
         mission_score += 3
-        mission_formula.append("+3 points : volume correct")
+        mission_formula.append(tr("formula_mission_volume_ok", lang))
 
     if has_accroche:
         mission_score += 2
-        mission_formula.append("+2 points : accroche présente")
+        mission_formula.append(tr("formula_mission_hook_present", lang))
     if has_intro:
         mission_score += 2
-        mission_formula.append("+2 points : introduction présente")
+        mission_formula.append(tr("formula_intro_present", lang))
 
-    mission_comments.append("Mesure si les missions sont concrètes et compréhensibles.")
+    mission_comments.append(tr("comment_missions", lang))
     mission_score = max(0, min(20, mission_score))
 
     structure_score = 0
@@ -228,24 +244,24 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
 
     if intro_present:
         structure_score += 3
-        structure_formula.append("+3 points : introduction présente")
+        structure_formula.append(tr("formula_intro_present", lang))
     if accroche_present:
         structure_score += 3
-        structure_formula.append("+3 points : accroche missions présente")
+        structure_formula.append(tr("formula_mission_hook_present", lang))
     if missions_present:
         structure_score += 4
-        structure_formula.append("+4 points : bloc missions suffisant")
+        structure_formula.append(tr("formula_mission_block_detailed", lang))
     if profil_present:
         structure_score += 4
-        structure_formula.append("+4 points : bloc profil suffisant")
+        structure_formula.append(tr("formula_profile_block_detailed", lang))
     if why_present:
         structure_score += 3
-        structure_formula.append("+3 points : rubrique Pourquoi nous rejoindre présente")
+        structure_formula.append(tr("formula_why_join_present", lang))
     if env_present:
         structure_score += 3
-        structure_formula.append("+3 points : rubrique Environnement de travail présente")
+        structure_formula.append(tr("formula_work_env_present", lang))
 
-    structure_comments.append("Mesure l’alignement avec la structure attendue d’une fiche AXA.")
+    structure_comments.append(tr("comment_structure", lang))
     structure_score = max(0, min(20, structure_score))
 
     total_raw = completeness_score + precision_score + screening_score + mission_score + structure_score
@@ -266,60 +282,60 @@ def compute_qualification_score(result, source_text: str = "", lang: str = "fr")
 
     recommandations = []
     if completeness_score < 14:
-        recommandations.append("Compléter les champs structurants du poste.")
+        recommandations.append(tr("reco_complete_fields", lang))
     if precision_score < 14:
-        recommandations.append("Réduire les formulations ambiguës et préciser les vraies informations manquantes.")
+        recommandations.append(tr("reco_reduce_ambiguity", lang))
     if screening_score < 14:
-        recommandations.append("Rendre le besoin plus exploitable pour le screening.")
+        recommandations.append(tr("reco_screening", lang))
     if mission_score < 14:
-        recommandations.append("Rendre les missions plus concrètes et actionnables.")
+        recommandations.append(tr("reco_missions", lang))
     if structure_score < 14:
-        recommandations.append("Compléter la structure de fiche AXA.")
+        recommandations.append(tr("reco_structure", lang))
     if not recommandations:
-        recommandations.append("Le besoin est suffisamment structuré pour une utilisation RH opérationnelle.")
+        recommandations.append(tr("reco_good_quality", lang))
 
     return {
         "score_global": score_global,
         "details": [
             {
-                "dimension": "Complétude structurante",
+                "dimension": tr("dimension_completeness", lang),
                 "score": completeness_score,
                 "sur": 20,
-                "commentaire": " ".join(completeness_comments),
+                "commentaire": tr("comment_completeness", lang),
                 "formule": completeness_formula,
-                "purpose": "Vérifie si les informations de base du poste sont présentes."
+                "purpose": tr("purpose_completeness", lang)
             },
             {
-                "dimension": "Précision du besoin",
+                "dimension": tr("dimension_precision", lang),
                 "score": precision_score,
                 "sur": 20,
-                "commentaire": " ".join(precision_comments),
+                "commentaire": tr("comment_precision", lang),
                 "formule": precision_formula,
-                "purpose": "Vérifie si le besoin est clair et non contradictoire."
+                "purpose": tr("purpose_precision", lang)
             },
             {
-                "dimension": "Exploitabilité screening",
+                "dimension": tr("dimension_screening", lang),
                 "score": screening_score,
                 "sur": 20,
-                "commentaire": " ".join(screening_comments),
+                "commentaire": tr("comment_screening", lang),
                 "formule": screening_formula,
-                "purpose": "Mesure si un recruteur peut filtrer les CV avec ce besoin."
+                "purpose": tr("purpose_screening", lang)
             },
             {
-                "dimension": "Clarté des missions",
+                "dimension": tr("dimension_missions", lang),
                 "score": mission_score,
                 "sur": 20,
-                "commentaire": " ".join(mission_comments),
+                "commentaire": tr("comment_missions", lang),
                 "formule": mission_formula,
-                "purpose": "Mesure si les missions sont suffisamment explicites."
+                "purpose": tr("purpose_missions", lang)
             },
             {
-                "dimension": "Conformité structure AXA",
+                "dimension": tr("dimension_structure", lang),
                 "score": structure_score,
                 "sur": 20,
-                "commentaire": " ".join(structure_comments),
+                "commentaire": tr("comment_structure", lang),
                 "formule": structure_formula,
-                "purpose": "Mesure l’alignement avec la structure attendue chez AXA."
+                "purpose": tr("purpose_structure", lang)
             },
         ],
         "niveau_maturite": niveau_maturite,
@@ -376,53 +392,53 @@ def build_quality_checklist(result, computed_score, lang: str = "fr"):
     fiche = result.get("fiche_de_poste_axa", {})
     return [
         {
-            "critere": "Intitulé du poste",
-            "statut": "Oui" if not is_missing_value(fiche.get("intitule_poste", "")) else "Non",
-            "commentaire": "L'intitulé doit permettre de comprendre immédiatement la nature du poste."
+            "critere": tr("checklist_job_title", lang),
+            "statut": tr("checklist_oui", lang) if not is_missing_value(fiche.get("intitule_poste", "")) else tr("checklist_non", lang),
+            "commentaire": tr("checklist_title_comment", lang),
         },
         {
-            "critere": "Informations structurantes",
-            "statut": "Oui" if computed_score["details"][0]["score"] >= 16 else "Partiel" if computed_score["details"][0]["score"] >= 10 else "Non",
-            "commentaire": "Contrat, expérience, société, localisation et famille métier doivent être visibles."
+            "critere": tr("checklist_structuring_info", lang),
+            "statut": tr("checklist_oui", lang) if computed_score["details"][0]["score"] >= 16 else tr("checklist_partiel", lang) if computed_score["details"][0]["score"] >= 10 else tr("checklist_non", lang),
+            "commentaire": tr("checklist_structuring_comment", lang),
         },
         {
-            "critere": "Missions explicites",
-            "statut": "Oui" if len(non_empty_list(fiche.get("votre_role_et_vos_missions", []))) >= 3 else "Partiel",
-            "commentaire": "Les responsabilités principales doivent être concrètes et compréhensibles."
+            "critere": tr("checklist_missions", lang),
+            "statut": tr("checklist_oui", lang) if len(non_empty_list(fiche.get("votre_role_et_vos_missions", []))) >= 3 else tr("checklist_partiel", lang),
+            "commentaire": tr("checklist_missions_comment", lang),
         },
         {
-            "critere": "Profil structuré",
-            "statut": "Oui" if len(non_empty_list(fiche.get("votre_profil", []))) >= 3 else "Partiel",
-            "commentaire": "Le profil doit distinguer expérience, compétences et posture attendue."
+            "critere": tr("checklist_profile", lang),
+            "statut": tr("checklist_oui", lang) if len(non_empty_list(fiche.get("votre_profil", []))) >= 3 else tr("checklist_partiel", lang),
+            "commentaire": tr("checklist_profile_comment", lang),
         },
         {
-            "critere": "Critères de screening",
-            "statut": "Oui" if len(non_empty_list(result.get("criteres_d_evaluation", []))) >= 2 else "Partiel",
-            "commentaire": "Le brief doit aider à filtrer les candidatures."
+            "critere": tr("checklist_criteria", lang),
+            "statut": tr("checklist_oui", lang) if len(non_empty_list(result.get("criteres_d_evaluation", []))) >= 2 else tr("checklist_partiel", lang),
+            "commentaire": tr("checklist_criteria_comment", lang),
         },
         {
-            "critere": "Risque d'ambiguïté",
-            "statut": "Faible" if computed_score["details"][1]["score"] >= 16 else "Moyen" if computed_score["details"][1]["score"] >= 10 else "Élevé",
-            "commentaire": "Risque de mauvaise interprétation du besoin."
+            "critere": tr("checklist_ambiguity", lang),
+            "statut": tr("checklist_faible", lang) if computed_score["details"][1]["score"] >= 16 else tr("checklist_moyen", lang) if computed_score["details"][1]["score"] >= 10 else tr("checklist_eleve", lang),
+            "commentaire": tr("checklist_ambiguity_comment", lang),
         },
-    ]
+]
 
 def build_screening_recommendations(result, lang: str = "fr"):
     fiche = result.get("fiche_de_poste_axa", {})
     recs = []
 
     if fiche.get("votre_role_et_vos_missions", []):
-        recs.append("Vérifier dans les CV la présence d'expériences liées aux missions prioritaires.")
+        recs.append(tr("screen_reco_missions", lang))
     if fiche.get("votre_profil", []):
-        recs.append("Rechercher les compétences, la séniorité et la posture attendue.")
+        recs.append(tr("screen_reco_profile", lang))
     if result.get("criteres_d_evaluation", []):
-        recs.append("Utiliser les critères d'évaluation comme grille commune de screening.")
+        recs.append(tr("screen_reco_criteria", lang))
     if result.get("questions_entretien", []):
-        recs.append("Préparer l'entretien à partir des questions proposées.")
+        recs.append(tr("screen_reco_questions", lang))
     if result.get("informations_manquantes", []):
-        recs.append("Ne pas figer trop tôt le screening si des informations critiques restent à clarifier.")
+        recs.append(tr("screen_reco_missing", lang))
     if not recs:
-        recs.append("Le besoin est suffisamment structuré pour préparer un screening cohérent.")
+        recs.append(tr("screen_reco_good", lang))
 
     return recs
 

@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 import re
 
 
-STRICT_INVALID_MESSAGE = "??Veuillez precis(??un besoin metier reel."
+STRICT_INVALID_MESSAGE = "❌ Veuillez préciser un besoin métier réel (pas de blagues, recettes, poèmes, etc.)"
 
 
 def normalize_text(value: str) -> str:
@@ -103,7 +103,7 @@ def detect_source_maturity(source_text: str) -> str:
     detailed_markers = [
         "type de contrat",
         "niveau d'expérience",
-        "niveau d’experience",
+        "niveau d'experience",
         "localisation",
         "votre rôle",
         "votre role",
@@ -129,44 +129,13 @@ def detect_source_maturity(source_text: str) -> str:
 
 
 def validate_recruitment_input(text: str) -> Dict[str, Any]:
-    # Validation tres simple et permissive
-    if not text or len(text.strip()) < 15:
-        return {"valid": False, "reason": "Texte trop court"}
-    
-    t = text.lower()
-    
-    # Rejets absolus (seulement pour du garbage total)
-    if any(x in t for x in ["blague", "recette", "poeme", "meteo"]):
-        return {"valid": False, "reason": STRICT_INVALID_MESSAGE}
-    
-    # Compter les mots reltes au recrutement
-    keywords_found = []
-    recruitment_terms = ["poste", "recrut", "profil", "mission", "competence", 
-                     "experience", "cdi", "cdd", "equipe", "data", "banque", 
-                     "finance", "projet", "consultant", "offre", "emploi",
-                     "recherch", "metier", "candidat", "equipes"]
-    
-    for term in recruitment_terms:
-        if term in t:
-            keywords_found.append(term)
-    
-    # LOGIQUE:
-    # - Texte > 100 carac => Accepter (meme sans mots cles)
-    # - Sinon avoir au moins 1 mot cle
-    # - Texte > 30 carac et pas rejete => Accepter
-    
-    if len(text) > 100:
-        return {"valid": True, "reason": "Texte sufficient"}
-    
-    if len(keywords_found) >= 1:
-        return {"valid": True, "reason": "Termes trouves"}
-    
-    if len(text) < 30:
-        return {"valid": False, "reason": STRICT_INVALID_MESSAGE}
-    
-    return {"valid": True, "reason": "Accepte"}
+    normalized = normalize_text(text)
 
+    if len(normalized) < 15:
+        return {"valid": False, "reason": "Le texte est trop court pour être analysé."}
 
+    return {"valid": True, "reason": "Texte accepté"}
+       
 def build_display_result(result: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(result, dict):
         return {}
